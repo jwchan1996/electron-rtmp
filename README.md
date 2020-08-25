@@ -1,9 +1,19 @@
 ![elecctron_rtmp.png](https://i.loli.net/2020/08/25/6YrBvNDpjtOKnCQ.png)
 
+当前示例是使用 `electron-vue` 模板生成的。
+
+```bash
+# 如果你没有vue-cli的话需要全局安装
+npm install -g vue-cli
+# 然后使用vue-cli来安装electron-vue的模板
+vue init simulatedgreg/electron-vue my-project
+```
+
 ## Usage
 
 ``` bash
 # 安装依赖
+cd my-project
 npm install
 
 # 开发模式
