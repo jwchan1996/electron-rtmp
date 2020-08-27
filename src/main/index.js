@@ -7,6 +7,9 @@
 import { app, BrowserWindow } from 'electron'
 import express from 'express'
 
+//引入自动判断端口可用函数
+import portIsOccupied from '../../lib/utils/portIsOccupied'
+
 /**
  * Set `__static` path to static files in production
  * https://simulatedgreg.gitbooks.io/electron-vue/content/en/using-static-assets.html
@@ -15,23 +18,23 @@ if (process.env.NODE_ENV !== 'development') {
   global.__static = require('path').join(__dirname, '/static').replace(/\\/g, '\\\\')
 }
 
-//解决flash本地file不安全问题
+//打包后的文件默认是以 "file://" 协议加载的
+//因为 flash 不允许在 "file://" 协议下加载，为了解决 flash 加载的安全问题
+//使用 express 用作本地服务器，使得页面运行在本地 http 端口服务
 function localServer() {
-  let server = express();
-  server.use(express.static(__dirname));
-  server.listen(9080);
-}
-
-if (process.env.NODE_ENV === "production") {
-  localServer();
+  // 使用 promise 配合 await 实现同步
+  return new Promise((resolve, reject) => {
+    let server = express()
+    server.use(express.static(__dirname));
+    portIsOccupied(9080).then(port => {
+      process.env.PROD_PORT = port
+      server.listen(port)
+      resolve(port)
+    })
+  }) 
 }
 
 let mainWindow
-const winURL = process.env.NODE_ENV === 'development'
-  ? `http://localhost:9080`
-  // : `file://${__dirname}/index.html`
-  //解决flash在file下不安全的问题
-  : `http://localhost:9080/index.html`
 
 // app.commandLine.appendSwitch('ppapi-flash-path', app.getPath('pepperFlashSystemPlugin'));
 let flashPlugins = process.arch == 'x64' 
@@ -46,7 +49,19 @@ if (__dirname.includes(".asar")) {
 app.commandLine.appendSwitch('ppapi-flash-path', flashPlugins);
 app.commandLine.appendSwitch('ppapi-flash-version', '29.0.0.238');
 
-function createWindow () {
+async function createWindow () {
+
+  if (process.env.NODE_ENV === "production") {
+    // 使用 async / await 实现同步等待，保证 process.env.PROD_PORT 的赋值
+    await localServer()
+  }
+
+  const winURL = process.env.NODE_ENV === 'development'
+  ? `http://localhost:${process.env.DEV_PORT}`
+  // : `file://${__dirname}/index.html`
+  // 解决 flash 不允许在 "file://" 协议下加载的问题
+  : `http://localhost:${process.env.PROD_PORT}/index.html`
+
   /**
    * Initial window options
    */

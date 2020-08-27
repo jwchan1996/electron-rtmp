@@ -12,6 +12,8 @@ const webpackHotMiddleware = require('webpack-hot-middleware')
 const mainConfig = require('./webpack.main.config')
 const rendererConfig = require('./webpack.renderer.config')
 
+const portIsOccupied = require('../lib/utils/portIsOccupied')
+
 let electronProcess = null
 let manualRestart = false
 let hotMiddleware
@@ -74,7 +76,9 @@ function startRenderer () {
       }
     )
 
-    server.listen(9080)
+    portIsOccupied(9080).then(port => {
+      server.listen(port)
+    })
   })
 }
 
