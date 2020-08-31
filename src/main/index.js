@@ -27,7 +27,6 @@ function localServer() {
     let server = express()
     server.use(express.static(__dirname));
     portIsOccupied(9080).then(port => {
-      process.env.PROD_PORT = port
       server.listen(port)
       resolve(port)
     })

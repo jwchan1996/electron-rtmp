@@ -3,9 +3,9 @@
 当前示例是使用 `electron-vue` 模板生成的。
 
 ```bash
-# 如果你没有vue-cli的话需要全局安装
+# 如果你没有 vue-cli 的话需要全局安装
 npm install -g vue-cli
-# 然后使用vue-cli来安装electron-vue的模板
+# 然后使用 vue-cli 来安装 electron-vue 的模板
 vue init simulatedgreg/electron-vue my-project
 ```
 
